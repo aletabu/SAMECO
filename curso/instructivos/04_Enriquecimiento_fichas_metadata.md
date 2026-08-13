@@ -21,7 +21,24 @@ Además del documento, el datastore puede guardar su ficha (`structData`): títu
 
 ## El pipeline (variante batch, la recomendada)
 
-Script: `../scripts/generar_fichas.py`. Qué hace:
+Script: `../scripts/generar_fichas.py`. Trabaja en **dos fases de IA** (dos
+casos de uso distintos de Gemini en un mismo pipeline):
+
+- **Fase 1 — el bibliotecario**: lee cada documento y genera su ficha
+  individual (título, año, autores, sector, tema, resumen, etiquetas). Los PDF
+  van enteros por visión (lee incluso escaneos sin OCR previo); los DOCX se
+  convierten a texto localmente (Gemini no acepta DOCX adjunto).
+- **Fase 2 — el curador**: ve TODAS las fichas juntas y normaliza la
+  taxonomía: unifica sinónimos bajo una forma canónica (misma etiqueta =
+  mismo string exacto), en minúsculas y castellano. Sin esta fase, cada
+  documento etiqueta por su cuenta ("5S" / "cinco eses" / "orden y limpieza")
+  y los filtros de la etapa Signal se vuelven inservibles.
+
+Detalles operativos del script: deduplica documentos que estén en dos formatos
+(ficha el .docx/.pdf y saltea el .md gemelo), espacia las llamadas para la
+cuota del free trial (~5 req/min) y reintenta ante 429.
+
+Paso a paso:
 
 1. Recorre los documentos del bucket (carpetas `evento/` e `historico/`).
 2. Le da cada archivo **entero** a Gemini Flash con esquema de salida forzado (JSON): título, año, autores, sector, tema, resumen. Gemini es multimodal: **lee también los escaneos** (no hace falta OCR previo para la ficha). La instrucción prohíbe inventar: lo que no consta queda vacío.
