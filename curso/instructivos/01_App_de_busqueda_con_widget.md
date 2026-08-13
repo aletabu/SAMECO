@@ -147,7 +147,7 @@ En la app → **Parámetros de configuración** → pestaña **IU**:
 
 4. **Guardar y publicar.**
 
-> 📸 _[Captura: configuración con "Búsqueda con seguimientos" e instrucciones]_
+![Configuración de la IU: Búsqueda con seguimientos y modelo de respuestas](img/01-paso7-configuracion.png)
 
 ## Paso 8 — Probar con un set de preguntas fijo
 

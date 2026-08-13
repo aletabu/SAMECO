@@ -87,7 +87,7 @@ Un agente nunca apunta al bucket: consume el **datastore** ya indexado.
 3. **Una herramienta por datastore**: si querés que también busque en un segundo
    datastore, agregá otra herramienta igual con el otro ID.
 
-> 📸 _[Captura: formulario de la herramienta completo]_
+![Formulario de la herramienta de datastore con los cuatro valores](img/02-paso3-herramienta.png)
 
 ## Paso 4 — El permiso que falta (LA causa del error típico)
 
@@ -123,7 +123,14 @@ Botón **Preview** del agente. Qué verificar:
   con fuente.
 - Las canarias: preguntas cuya respuesta correcta es el fallback exacto.
 
-> 📸 _[Captura: conversación en Preview con la invocación de la herramienta]_
+![Preview: el agente invoca la herramienta varias veces y responde con links de descarga](img/02-paso5-preview.png)
+
+> En la captura se ve un extra: la respuesta incluye **enlaces de descarga** de
+> los documentos citados. Eso se logra con una instrucción adicional (convertir
+> la URI interna `gs://BUCKET/ruta` en `https://storage.googleapis.com/BUCKET/ruta`)
+> y requiere que los objetos del bucket sean públicos — si el bucket es privado,
+> el asistente responde igual (lee del índice) pero el público no puede
+> descargar los originales.
 
 ## Paso 6 — Qué hay (y qué NO hay) después del Preview
 
