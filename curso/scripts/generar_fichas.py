@@ -31,6 +31,11 @@ BUCKET = "CAMBIAR-nombre-del-bucket"
 CARPETAS = ["evento/", "historico/"]
 MODELO = "gemini-2.5-flash"       # estable y barato; alcanza de sobra para fichas
 
+# Base de la URL pública de descarga que va en la ficha (campo "url").
+# Opciones: objetos públicos del bucket (default) o los documentos ya
+# publicados en el sitio de la organización. Dejar en None para omitir el campo.
+URL_PUBLICA_BASE = f"https://storage.googleapis.com/{BUCKET}/"
+
 MIMES = {
     ".pdf": "application/pdf",
     ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -90,6 +95,8 @@ def main():
                 ),
             )
             ficha = json.loads(respuesta.text)
+            if URL_PUBLICA_BASE:
+                ficha["url"] = URL_PUBLICA_BASE + blob.name
             print(f"  → {ficha['titulo']} ({ficha['anio']}) · {ficha['tema']}")
             lineas.append(json.dumps({
                 "id": slug(blob.name),

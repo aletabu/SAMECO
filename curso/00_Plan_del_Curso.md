@@ -82,8 +82,10 @@ Guion de las 4 sesiones de 1,5 h comprometidas en la propuesta v2 (sección 7), 
 | `curso/03_Set_Preguntas_Prueba.md` | Plantilla del set de pruebas (sandbox y SAMECO) |
 | `curso/04_Actualizacion_2026_Nombres_y_Costos.md` | Cifras y nombres vigentes; correcciones a la propuesta |
 | `curso/material_practica/` | Documentos ficticios para el sandbox (evento + histórico + escaneo 2009) |
-| `curso/05_Enriquecimiento_Fichas_Metadata.md` | Enriquecimiento con fichas de metadatos (el "fine-tuning" del RAG): pipeline, script y cuidados — trabajo tuyo entre Sesión 2 y 3 |
-| `curso/scripts/generar_fichas.py` | Script del análisis semántico: genera el JSONL de fichas con Gemini |
+| `curso/instructivos/04_Enriquecimiento_fichas_metadata.md` | Enriquecimiento con fichas de metadatos (el "fine-tuning" del RAG), incl. campo `url` de descarga pública — parte del entregable, trabajo entre Sesión 2 y 3 |
+| `curso/instructivos/03_QA_y_evaluacion.md` | Metodología de QA: set de 4 tipos de pregunta, escala de anotación y corrida automática |
+| `curso/scripts/generar_fichas.py` | Script del análisis semántico: genera el JSONL de fichas (con URL de descarga) |
+| `curso/scripts/correr_set_pruebas.py` + `set_pruebas.json` | Corredor automático del set contra la Answer API + juez Gemini → CSV de resultados |
 | `curso/slides/` | Los 4 PPT de las sesiones (`generar_pptx.py` es la fuente; editar y regenerar) |
 | `curso/instructivos/` | Instructivos para alumnos: A = app de búsqueda + widget (el entregable), B = agente propio con Agent Studio (fase 2 / comparativa) |
 | `curso/widget/` | Página de demo comparativa (widget oficial + chat del Bibliotecario) y su `servidor_demo.py` |

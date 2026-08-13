@@ -1,0 +1,26 @@
+{
+  "comentario": "Set de pruebas del sandbox SAMECO (fuente: curso/03_Set_Preguntas_Prueba.md). Tipos: factual, sintesis, canaria (fallback esperado), ambigua/seguimiento. 'sigue_a' encadena la pregunta en la misma sesión que la indicada.",
+  "preguntas": [
+    {"n": 1,  "bloque": "A", "tipo": "factual",    "pregunta": "¿Qué días es el encuentro?", "esperado": "Jueves 22 y viernes 23 de octubre de 2026"},
+    {"n": 2,  "bloque": "A", "tipo": "factual",    "pregunta": "¿A qué hora abren las puertas?", "esperado": "08:00 ambos días"},
+    {"n": 3,  "bloque": "A", "tipo": "sintesis",   "pregunta": "¿Quién da la charla de apertura y de qué trata?", "esperado": "Ing. Marta Villanueva, 'La mejora continua en la era de la IA', 10:00 en Auditorio A"},
+    {"n": 4,  "bloque": "A", "tipo": "factual",    "pregunta": "¿Cuánto sale la inscripción para estudiantes?", "esperado": "$20.000 early bird / $25.000 después del 15/09"},
+    {"n": 5,  "bloque": "A", "tipo": "factual",    "pregunta": "¿La inscripción incluye el almuerzo?", "esperado": "No; incluye coffee breaks, material y certificado (la negación es explícita en el documento)"},
+    {"n": 6,  "bloque": "A", "tipo": "factual",    "pregunta": "¿Cómo llego en subte?", "esperado": "Línea B, estación Carlos Pellegrini"},
+    {"n": 7,  "bloque": "A", "tipo": "factual",    "pregunta": "¿El taller de A3 requiere algo especial?", "esperado": "Cupo de 40 personas, inscripción previa en acreditación"},
+    {"n": 8,  "bloque": "A", "tipo": "seguimiento", "sigue_a": 1, "pregunta": "¿y el segundo día a la mañana qué hay?", "esperado": "Plenaria de S. Ferreyra 09:00 + tanda 3 de trabajos (debe resolver 'segundo día' = viernes 23 por contexto)"},
+    {"n": 9,  "bloque": "A", "tipo": "factual",    "pregunta": "¿Hay descuento de hotel?", "esperado": "15% en Hotel Presidente, código ENCUENTRO2026, hasta 30/09"},
+    {"n": 10, "bloque": "A", "tipo": "canaria",    "pregunta": "¿Va a estar Carlos Pagni en el evento?", "esperado": "No figura en el material: fallback honesto, no inventar"},
+    {"n": 11, "bloque": "B", "tipo": "factual",    "pregunta": "¿Hay trabajos sobre 5S?", "esperado": "Sí, el de la metalúrgica de Villa Constitución (2018)"},
+    {"n": 12, "bloque": "B", "tipo": "factual",    "pregunta": "¿Qué resultados logró el trabajo de SMED?", "esperado": "De 94 a 31 minutos (67%), +2,1 h/día, repago < 4 meses"},
+    {"n": 13, "bloque": "B", "tipo": "sintesis",   "pregunta": "¿Se aplicó mejora continua en salud alguna vez?", "esperado": "Sí: kaizen en guardia hospitalaria (2023), espera de 4:20 a 2:05"},
+    {"n": 14, "bloque": "B", "tipo": "factual",    "pregunta": "¿Quiénes escribieron el trabajo de 5S y de qué año es?", "esperado": "J. Domínguez y R. Salas, 2018"},
+    {"n": 15, "bloque": "B", "tipo": "sintesis",   "pregunta": "¿Cuál fue el factor de éxito común en los trabajos presentados?", "esperado": "Síntesis multi-documento: compromiso de supervisión, participación de operarios, equipos mixtos"},
+    {"n": 16, "bloque": "B", "tipo": "canaria",    "pregunta": "¿Hay algún trabajo sobre Six Sigma en bancos?", "esperado": "No hay: fallback honesto"},
+    {"n": 17, "bloque": "C", "tipo": "factual",    "pregunta": "¿Dónde es el evento?", "esperado": "Responde SOLO con material del evento, sin mezclar histórico"},
+    {"n": 18, "bloque": "C", "tipo": "factual",    "pregunta": "¿Qué se presentó sobre kaizen en años anteriores?", "esperado": "Va al histórico y cita el trabajo de 2023 (hospital)"},
+    {"n": 19, "bloque": "C", "tipo": "sintesis",   "pregunta": "¿En el evento de octubre va a haber charlas de kaizen como las de antes?", "esperado": "Pregunta mixta: cita agenda 2026 y referencia histórica sin confundir fechas"},
+    {"n": 20, "bloque": "C", "tipo": "canaria",    "pregunta": "¿Cuánto salía la inscripción en 2018?", "esperado": "El histórico no tiene aranceles: fallback, sin usar los precios de 2026"},
+    {"n": 21, "bloque": "B", "tipo": "factual",    "pregunta": "¿Qué scrap tenía la línea de pintura en 2009?", "esperado": "8,5% inicial, reducido a 2,1% (valida el OCR del escaneo de 2009)"}
+  ]
+}
