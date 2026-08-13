@@ -8,7 +8,7 @@ No es un repositorio de código: son los materiales de una asesoría de Alejandr
 
 ## Estructura
 
-- **Raíz (`.docx`)**: entregables formales para el cliente (propuesta, guías técnica y de capacitación). `Propuesta_Asesoria_Agente_QA_v2.docx` es el contrato de alcance.
+- **Raíz (`.docx`)**: entregables formales para el cliente (propuesta, guías técnica y de capacitación). `Propuesta_Asesoria_Agente_QA_v2.docx` es el contrato de alcance. **Solo locales, fuera del repo** (gitignoreados): su contenido fue absorbido por `curso/instructivos/`, salvo la mini-demo RAG en Python (Parte B.5 de la guía técnica) y la propuesta misma.
 - **`curso/*.md`**: materiales de preparación de Alejandro, numerados 00–04. `00_Plan_del_Curso.md` es el índice maestro: mapea cada sesión con su documento de respaldo y lista los riesgos vigentes.
 - **`curso/material_practica/`**: documentos ficticios para el sandbox, en pares `.md` (fuente) + `.docx` (generado con `python-docx`). Subcarpetas `evento/` e `historico/`; incluye `trabajo_2009_escaneado_pintura.pdf`, un escaneo simulado (imagen sin capa de texto) para demos de OCR — no "arreglarlo" agregándole texto seleccionable.
 

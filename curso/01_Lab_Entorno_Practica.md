@@ -139,6 +139,6 @@ Al terminar la práctica: IAM & Admin → Settings → **Shut down** el proyecto
 | 403 / PERMISSION_DENIED al crear algo | API no habilitada en el proyecto (no existe el "está todo disponible" de Azure) |
 | No aparece la opción de respuestas generativas | Faltó el toggle de Advanced LLM features al crear la app |
 | El escaneo no aparece en respuestas | Datastore creado con digital parser; recrealo con OCR/layout parser |
-| Widget no carga en tu página | Dominio no allowlisteado, o datastore con ACL |
+| Widget no carga en tu página | Dominio no allowlisteado, datastore con ACL, o cambios recientes sin propagar (**hasta 30 min**, lo dice la propia pantalla de Integration). Verificado ago-2026: con "Public Access" + `localhost` guardados, solo queda esperar. La página debe abrirse por `http://localhost:PUERTO`, nunca con doble clic (`file://` no es un dominio y no se puede allowlistear) |
 | "Sync from Google Drive" falla | Cuenta personal sin Workspace (ver hallazgo crítico) |
 | El documento nuevo no impacta | La reindexación no es instantánea; revisá Activity del datastore |

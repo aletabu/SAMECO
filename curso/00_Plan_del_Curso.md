@@ -72,15 +72,21 @@ Guion de las 4 sesiones de 1,5 h comprometidas en la propuesta v2 (sección 7), 
 
 | Documento | Rol en el curso |
 |---|---|
-| `Propuesta_Asesoria_Agente_QA_v2.docx` | Contrato y alcance; §4 es guion de la Sesión 2 |
-| `Guia_Tecnica_Agente_QA_Vertex_1.docx` | Tu guía de implementación (Partes A y B); Parte C = guion Sesión 1 |
-| `Guia_Capacitacion_Agente_QA.docx` | Guion Sesión 3 (prompt, iteración, caché) y checklist de cierre |
-| `Capacitacion_Tecnica_Embeddings_Contexto.docx` | Material de la demo opcional (Sesión 4) y tu propio estudio |
+| `Propuesta_Asesoria_Agente_QA_v2.docx` *(local, fuera del repo)* | Contrato y alcance; §4 es guion de la Sesión 2 |
+| `Guia_Tecnica_Agente_QA_Vertex_1.docx` *(local; reemplazada por `instructivos/01` + `instructivos/00`, salvo la mini-demo RAG B.5)* | Parte B.5 = demo opcional Sesión 4 |
+| `Guia_Capacitacion_Agente_QA.docx` *(local; conceptos absorbidos en `instructivos/00`)* | Guion Sesión 3 (prompt, iteración, caché) y checklist de cierre |
+| `Capacitacion_Tecnica_Embeddings_Contexto.docx` *(local)* | Material de la demo opcional (Sesión 4) y tu propio estudio |
+| `curso/instructivos/00_Conceptos_basicos.md` | Conceptos base para alumnos (LLM, RAG, grounding, datastore, contexto + pipeline interno) |
 | `curso/01_Lab_Entorno_Practica.md` | Tu práctica previa en sandbox |
 | `curso/02_Mapa_Azure_a_Google.md` | Tu traducción Azure → Google |
 | `curso/03_Set_Preguntas_Prueba.md` | Plantilla del set de pruebas (sandbox y SAMECO) |
 | `curso/04_Actualizacion_2026_Nombres_y_Costos.md` | Cifras y nombres vigentes; correcciones a la propuesta |
 | `curso/material_practica/` | Documentos ficticios para el sandbox (evento + histórico + escaneo 2009) |
+| `curso/05_Enriquecimiento_Fichas_Metadata.md` | Enriquecimiento con fichas de metadatos (el "fine-tuning" del RAG): pipeline, script y cuidados — trabajo tuyo entre Sesión 2 y 3 |
+| `curso/scripts/generar_fichas.py` | Script del análisis semántico: genera el JSONL de fichas con Gemini |
+| `curso/slides/` | Los 4 PPT de las sesiones (`generar_pptx.py` es la fuente; editar y regenerar) |
+| `curso/instructivos/` | Instructivos para alumnos: A = app de búsqueda + widget (el entregable), B = agente propio con Agent Studio (fase 2 / comparativa) |
+| `curso/widget/` | Página de demo comparativa (widget oficial + chat del Bibliotecario) y su `servidor_demo.py` |
 
 ## Riesgos a tener a mano
 

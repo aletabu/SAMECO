@@ -1,3 +1,8 @@
 .DS_Store
-*.html
-*.html.txt
+# HTML temporales de investigación en el raíz (curso/widget/*.html sí se versiona)
+/*.html
+/*.html.txt
+
+# Docs Word del raíz: entregables del cliente y borradores, solo locales
+# (los .docx de curso/material_practica/ SÍ se versionan)
+/*.docx

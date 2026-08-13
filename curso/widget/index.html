@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Encuentro SAMECO 2026 — demo comparativa</title>
+<style>
+  :root {
+    --azul: #123c5b;
+    --acento: #2563eb;
+    --violeta: #7c3aed;
+    --tinta: #1f2937;
+    --gris: #6b7280;
+    --panel: #f3f4f6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "Segoe UI", Arial, sans-serif; color: var(--tinta); background: #fff; }
+
+  header {
+    background: var(--azul);
+    color: #fff;
+    padding: 2.5rem 1.5rem 2rem;
+    text-align: center;
+  }
+  header .logo { height: 38px; margin-bottom: .8rem; }
+  header .kicker {
+    color: #93c5fd;
+    font-size: .85rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  header h1 { font-size: 2rem; margin: .4rem 0 .3rem; }
+  header p { color: #d1d5db; }
+
+  .comparativa {
+    max-width: 1100px;
+    margin: 2rem auto 3rem;
+    padding: 0 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  .col {
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: .9rem;
+  }
+  .col h2 { font-size: 1.05rem; }
+  .col .etiqueta {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: .25rem .6rem;
+    border-radius: 999px;
+    width: fit-content;
+    color: #fff;
+  }
+  .col.busqueda .etiqueta { background: var(--acento); }
+  .col.agente .etiqueta { background: var(--violeta); }
+  .col .desc { font-size: .85rem; color: var(--gris); }
+
+  /* Panel 1: disparador del widget oficial */
+  #searchWidgetTrigger {
+    width: 100%;
+    padding: .9rem 1rem .9rem 2.7rem;
+    font-size: 1rem;
+    border: 2px solid var(--acento);
+    border-radius: 999px;
+    background: #fff url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") no-repeat 1rem center;
+    cursor: pointer;
+  }
+
+  /* Panel 2: chat propio contra /api/chat */
+  #chat {
+    height: 320px;
+    overflow-y: auto;
+    background: var(--panel);
+    border-radius: 10px;
+    padding: .8rem;
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+    font-size: .92rem;
+  }
+  .msg { max-width: 85%; padding: .55rem .8rem; border-radius: 12px; white-space: pre-wrap; }
+  .msg.user { align-self: flex-end; background: var(--violeta); color: #fff; }
+  .msg.bot { align-self: flex-start; background: #fff; border: 1px solid #e5e7eb; }
+  .msg.bot .fuentes { display: block; margin-top: .4rem; font-size: .75rem; color: var(--gris); }
+  .fila-input { display: flex; gap: .5rem; }
+  #msg {
+    flex: 1;
+    padding: .8rem 1rem;
+    font-size: 1rem;
+    border: 2px solid var(--violeta);
+    border-radius: 999px;
+  }
+  #enviar {
+    padding: 0 1.2rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--violeta);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  .nota {
+    max-width: 1100px;
+    margin: 0 auto 2.5rem;
+    padding: 0 1.5rem;
+    font-size: .8rem;
+    color: var(--gris);
+  }
+  @media (max-width: 800px) { .comparativa { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="logo-sameco.png" alt="SAMECO" class="logo">
+  <div class="kicker">Página de práctica — sandbox · demo comparativa</div>
+  <h1>Encuentro SAMECO 2026</h1>
+  <p>Una biblioteca, dos mostradores: probá la misma pregunta en los dos paneles</p>
+</header>
+
+<div class="comparativa">
+
+  <!-- ===== Panel 1: widget oficial de la app de búsqueda ===== -->
+  <section class="col busqueda">
+    <span class="etiqueta">App de búsqueda · widget oficial</span>
+    <h2>Asistente del evento</h2>
+    <p class="desc">Producto: AI Applications (Agent Search). El widget viene hecho:
+       se pega un snippet y listo. Conversacional con seguimientos, citas y fallback.
+       Es el entregable del proyecto.</p>
+    <input placeholder="Preguntale al asistente…" id="searchWidgetTrigger" />
+    <p class="desc">Sugeridas: ¿Cuánto sale la inscripción para estudiantes? ·
+       ¿Hay trabajos sobre 5S? · ¿Va a estar Carlos Pagni? 🐤</p>
+  </section>
+
+  <!-- ===== Panel 2: chat propio (réplica del agente de Agent Studio) ===== -->
+  <section class="col agente">
+    <span class="etiqueta">Agent Platform · desarrollo propio</span>
+    <h2>Bibliotecario SAMECO</h2>
+    <p class="desc">Producto: Agent Studio / Gemini con grounding. No existe widget
+       embebible: este chat lo sirve <code>servidor_demo.py</code> — el "desarrollo
+       a medida" que exige este camino. Saluda, repregunta y desambigua.</p>
+    <div id="chat"></div>
+    <div class="fila-input">
+      <input id="msg" placeholder="Escribile al Bibliotecario…" autocomplete="off" />
+      <button id="enviar">➤</button>
+    </div>
+  </section>
+
+</div>
+
+<p class="nota">
+  Página de práctica del sandbox — no es el sitio real de SAMECO. Panel izquierdo:
+  requiere allowlist del dominio en Integration → Widget. Panel derecho: requiere
+  <code>servidor_demo.py</code> corriendo (usa tus credenciales locales de gcloud;
+  en producción sería un backend con su cuenta de servicio).
+</p>
+
+<!-- ====== Widget oficial (app de búsqueda) ====== -->
+<script src="https://cloud.google.com/ai/gen-app-builder/client?hl=es_419"></script>
+<gen-search-widget
+  configId="e70a004c-cd99-40fc-b55a-d504471fe151"
+  location="us"
+  triggerId="searchWidgetTrigger">
+</gen-search-widget>
+
+<!-- ====== Chat del Bibliotecario (backend propio) ====== -->
+<script>
+const chat = document.getElementById("chat");
+const input = document.getElementById("msg");
+const boton = document.getElementById("enviar");
+const mensajes = [];
+
+function pintar(rol, texto, fuentes) {
+  const div = document.createElement("div");
+  div.className = "msg " + (rol === "user" ? "user" : "bot");
+  div.textContent = texto;
+  if (fuentes && fuentes.length) {
+    const f = document.createElement("span");
+    f.className = "fuentes";
+    f.textContent = "Fuentes: " + fuentes.join(" · ");
+    div.appendChild(f);
+  }
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function enviar() {
+  const texto = input.value.trim();
+  if (!texto) return;
+  input.value = "";
+  mensajes.push({ rol: "user", texto });
+  pintar("user", texto);
+  pintar("bot", "…");
+  const espera = chat.lastChild;
+  try {
+    const r = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mensajes }),
+    });
+    const data = await r.json();
+    espera.remove();
+    mensajes.push({ rol: "bot", texto: data.texto });
+    pintar("bot", data.texto, data.fuentes);
+  } catch (e) {
+    espera.textContent = "[No pude contactar al servidor demo — ¿está corriendo servidor_demo.py?]";
+  }
+}
+
+boton.addEventListener("click", enviar);
+input.addEventListener("keydown", (e) => { if (e.key === "Enter") enviar(); });
+pintar("bot", "¡Hola! Soy el Bibliotecario de SAMECO. ¿En qué investigación o trabajo puedo ayudarte hoy?");
+</script>
+
+</body>
+</html>
