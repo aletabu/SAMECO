@@ -85,6 +85,34 @@ Costo: centavos (Flash ≈ $0,30/1M tokens de entrada; verificado ago-2026).
 - Tras importar, en la pestaña **Schema** del datastore se ajusta qué campos son filtrables/recuperables (agregar campos nuevos es retrocompatible).
 - Verificación de que pagó: correr el set de preguntas y comparar "¿qué trabajos hay de 2018?" y "¿hay algo del sector alimentario?" antes/después.
 
+## Videos de YouTube: la biblioteca audiovisual
+
+El datastore no indexa videos — indexa texto. Pero **Gemini puede mirar un
+video de YouTube directamente por URL** (sin descargarlo) y producir su
+documento de biblioteca. Script: `../scripts/generar_transcripciones.py`:
+
+1. El equipo lista las URLs en `videos.txt` (una por línea).
+2. Por cada video, Gemini genera: ficha (título, oradores, año, tema,
+   etiquetas) + resumen + **secciones con marca de tiempo** cubriendo todo lo
+   hablado — fiel al contenido, sin agregar información externa.
+3. Salida: un `.md` por video (a subir a `gs://BUCKET/videos/`) y
+   `videos.metadata.jsonl` con las fichas, donde **`url` = el link de YouTube**
+   y `tipo_material` = "video". El asistente responde con lo dicho en la charla
+   y ofrece "Ver el video" con el link (y el minuto, gracias a los timestamps).
+
+Probado con un video real del canal de SAMECO (~28 min): 10 secciones con
+timestamps correctos, oradores identificados por nombre, resumen fiel.
+Costo: centavos por video con Flash.
+
+Cuidados: (a) para videos de **terceros**, indexar solo ficha + resumen breve
+con link, no transcripción completa; (b) charlas muy largas → el resumen por
+secciones indexa mejor que la transcripción literal; (c) misma cuota de
+free trial que el resto (el script ya espacia las llamadas).
+
+En el inventario de la Sesión 1, esto agrega una categoría al semáforo:
+verde (texto limpio) / amarillo (escaneos → OCR) / rojo (láminas → describir)
+/ **azul (videos → transcribir)** — tarea del consultor entre sesiones.
+
 ## Variante automática (fase 2, NO para el go-live)
 
 "Que la ficha se genere sola cuando se sube un documento": **Cloud Run + trigger de Eventarc** sobre el bucket, con el mismo análisis adentro, importando directo al datastore. Queda documentada como fase 2 porque: (a) suma piezas que mantener (permisos, reintentos, fallas silenciosas), (b) el volumen de SAMECO no la justifica, y (c) elimina el paso de revisión humana de la ficha. Se reevalúa si el archivo histórico crece a cientos de documentos por mes.
