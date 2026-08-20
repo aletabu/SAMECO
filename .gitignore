@@ -6,3 +6,4 @@
 # Docs Word del raíz: entregables del cliente y borradores, solo locales
 # (los .docx de curso/material_practica/ SÍ se versionan)
 /*.docx
+.venv/

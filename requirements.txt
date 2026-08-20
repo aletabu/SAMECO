@@ -1,0 +1,8 @@
+# Dependencias de los scripts del repo (ver README.md para el paso a paso)
+google-genai
+google-cloud-storage
+python-docx
+python-pptx
+requests
+# Solo para el modo remoto de curso/widget/servidor_demo.py (agente en Agent Runtime):
+google-cloud-aiplatform[agent_engines]
