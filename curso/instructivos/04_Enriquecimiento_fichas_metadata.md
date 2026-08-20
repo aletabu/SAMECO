@@ -66,6 +66,16 @@ permisos de IAM. Con el campo `url` en la ficha:
 4. **Revisión humana de las fichas** (en SAMECO: contra la planilla del equipo). Este paso no se automatiza: es donde el criterio agrega valor.
 5. Importar: datastore → **Import data** → Cloud Storage → **"JSONL con metadatos"** → modo **FULL**.
 
+![Importar datos desde Cloud Storage: carpeta metadata/ del bucket, tipo "Documentos con metadatos (RAG)"](img/04-import-jsonl-metadatos.png)
+
+   Así se ve el formulario: pestaña **Datos** del datastore → Importar → Cloud
+   Storage, apuntando a la carpeta `metadata/` del bucket (no a las carpetas de
+   documentos) y con el tipo **"Documentos con metadatos (RAG)"** elegido — el
+   esquema del JSONL se detecta solo. Ojo con la última opción: en la captura
+   quedó marcada "Incremental", pero para esta primera importación con fichas
+   corresponde **"Completa"** (FULL), por el tema de los IDs que se explica
+   abajo.
+
 ### Requisitos (una vez)
 
 ```bash
