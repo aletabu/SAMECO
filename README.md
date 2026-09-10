@@ -81,6 +81,7 @@ cada uno:
 | `curso/scripts/generar_fichas.py` | Genera las fichas de metadatos de los documentos del bucket con Gemini (ver instructivo D) |
 | `curso/scripts/generar_transcripciones.py` | Convierte videos de YouTube (`videos.txt`) en documentos indexables |
 | `curso/widget/servidor_demo.py` | Demo comparativa en `http://localhost:8500`; con `--remoto` usa el agente publicado en Agent Runtime |
+| `curso/widget/servidor_sameco.py` | El chat SAMI contra el proyecto real de SAMECO en `http://localhost:8501`; se publica en Cloud Run con el `Dockerfile` de la misma carpeta (ver `curso/instructivos/05_…`) |
 | `curso/slides/generar_pptx.py` | Regenera los 4 PPT del curso (editar este script, no los .pptx) |
 
 Ejemplo, con el venv activado:

@@ -88,7 +88,8 @@ Guion de las 4 sesiones de 1,5 h comprometidas en la propuesta v2 (sección 7), 
 | `curso/scripts/correr_set_pruebas.py` + `set_pruebas.json` | Corredor automático del set contra la Answer API + juez Gemini → CSV de resultados |
 | `curso/slides/` | Los 4 PPT de las sesiones (`generar_pptx.py` es la fuente; editar y regenerar) |
 | `curso/instructivos/` | Instructivos para alumnos: A = app de búsqueda + widget (el entregable), B = agente propio con Agent Studio (fase 2 / comparativa) |
-| `curso/widget/` | Página de demo comparativa (widget oficial + chat del Bibliotecario) y su `servidor_demo.py` |
+| `curso/widget/` | Página de demo comparativa (widget oficial + chat del Bibliotecario) y su `servidor_demo.py`; `servidor_sameco.py` + `Dockerfile` = el chat contra el proyecto real de SAMECO, publicable en Cloud Run |
+| `curso/instructivos/05_Publicacion_agente_Cloud_Run.md` | Instructivo E: publicar el agente como chat web en Cloud Run (cuenta de servicio sin claves, modos local/remoto, costos) |
 
 ## Riesgos a tener a mano
 
