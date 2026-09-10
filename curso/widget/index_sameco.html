@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SAMI — Asistente SAMECO</title>
+<style>
+  :root {
+    --azul: #123c5b;
+    --violeta: #7c3aed;
+    --tinta: #1f2937;
+    --gris: #6b7280;
+    --panel: #f3f4f6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "Segoe UI", Arial, sans-serif; color: var(--tinta); background: #fff; }
+
+  header {
+    background: var(--azul);
+    color: #fff;
+    padding: 2.5rem 1.5rem 2rem;
+    text-align: center;
+  }
+  header .logo { height: 38px; margin-bottom: .8rem; }
+  header .kicker {
+    color: #93c5fd;
+    font-size: .85rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  header h1 { font-size: 2rem; margin: .4rem 0 .3rem; }
+  header p { color: #d1d5db; }
+
+  .contenedor {
+    max-width: 720px;
+    margin: 2rem auto 3rem;
+    padding: 0 1.5rem;
+  }
+  .col {
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: .9rem;
+  }
+  .col h2 { font-size: 1.05rem; }
+  .col .etiqueta {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: .25rem .6rem;
+    border-radius: 999px;
+    width: fit-content;
+    color: #fff;
+    background: var(--violeta);
+  }
+  .col .desc { font-size: .85rem; color: var(--gris); }
+
+  #chat {
+    height: 420px;
+    overflow-y: auto;
+    background: var(--panel);
+    border-radius: 10px;
+    padding: .8rem;
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+    font-size: .92rem;
+  }
+  .msg { max-width: 85%; padding: .55rem .8rem; border-radius: 12px; white-space: pre-wrap; }
+  .msg.user { align-self: flex-end; background: var(--violeta); color: #fff; }
+  .msg.bot { align-self: flex-start; background: #fff; border: 1px solid #e5e7eb; }
+  .msg.bot .fuentes { display: block; margin-top: .4rem; font-size: .75rem; color: var(--gris); }
+  .fila-input { display: flex; gap: .5rem; }
+  #msg {
+    flex: 1;
+    padding: .8rem 1rem;
+    font-size: 1rem;
+    border: 2px solid var(--violeta);
+    border-radius: 999px;
+  }
+  #enviar {
+    padding: 0 1.2rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--violeta);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  .nota {
+    max-width: 720px;
+    margin: 0 auto 2.5rem;
+    padding: 0 1.5rem;
+    font-size: .8rem;
+    color: var(--gris);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="logo-sameco.png" alt="SAMECO" class="logo">
+  <div class="kicker">Proyecto agente-biblioteca · página de prueba</div>
+  <h1>SAMI — Asistente SAMECO</h1>
+  <p>El Bibliotecario del archivo y del Encuentro 2026, contra la biblioteca real</p>
+</header>
+
+<div class="contenedor">
+  <section class="col">
+    <span class="etiqueta">Agent Studio · réplica local</span>
+    <h2>Chateá con SAMI</h2>
+    <p class="desc">Mismas instrucciones, mismo modelo (gemini-3.5-flash) y mismo
+       datastore (<code>almacen_global</code>) que el agente SAMI del Agent Studio
+       de SAMECO. Lo sirve <code>servidor_sameco.py</code>.</p>
+    <div id="chat"></div>
+    <div class="fila-input">
+      <input id="msg" placeholder="Escribile a SAMI…" autocomplete="off" />
+      <button id="enviar">➤</button>
+    </div>
+  </section>
+</div>
+
+<p class="nota">
+  Página de prueba — no es el sitio real de SAMECO. Requiere
+  <code>servidor_sameco.py</code> corriendo con credenciales (ADC) que tengan
+  acceso al proyecto <code>agente-biblioteca</code>; en producción sería un
+  backend con su cuenta de servicio.
+</p>
+
+<script>
+const chat = document.getElementById("chat");
+const input = document.getElementById("msg");
+const boton = document.getElementById("enviar");
+const mensajes = [];
+
+function pintar(rol, texto, fuentes) {
+  const div = document.createElement("div");
+  div.className = "msg " + (rol === "user" ? "user" : "bot");
+  div.textContent = texto;
+  if (fuentes && fuentes.length) {
+    const f = document.createElement("span");
+    f.className = "fuentes";
+    f.textContent = "Fuentes: " + fuentes.join(" · ");
+    div.appendChild(f);
+  }
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function enviar() {
+  const texto = input.value.trim();
+  if (!texto) return;
+  input.value = "";
+  mensajes.push({ rol: "user", texto });
+  pintar("user", texto);
+  pintar("bot", "…");
+  const espera = chat.lastChild;
+  try {
+    const r = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mensajes }),
+    });
+    const data = await r.json();
+    espera.remove();
+    mensajes.push({ rol: "bot", texto: data.texto });
+    pintar("bot", data.texto, data.fuentes);
+  } catch (e) {
+    espera.textContent = "[No pude contactar al servidor — ¿está corriendo servidor_sameco.py?]";
+  }
+}
+
+boton.addEventListener("click", enviar);
+input.addEventListener("keydown", (e) => { if (e.key === "Enter") enviar(); });
+pintar("bot", "¡Hola! Soy SAMI, el asistente de SAMECO. Preguntame por el Encuentro 2026 o por los trabajos del archivo.");
+</script>
+
+</body>
+</html>
