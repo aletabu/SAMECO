@@ -17,7 +17,7 @@
 import json
 import os
 import sys
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 
 from google import genai
 from google.genai import types
@@ -27,7 +27,9 @@ LOCATION = "global"   # los modelos gemini-3.x solo se sirven desde global
 DATASTORE = ("projects/agente-biblioteca/locations/us/collections/"
              "default_collection/dataStores/almacen-global_1788552974869")
 MODELO = "gemini-3.5-flash"   # el mismo que usa SAMI en su Agent Studio
-PUERTO = 8501                 # 8500 queda para la demo del sandbox
+# 8501 local (8500 queda para la demo del sandbox); en Cloud Run el puerto
+# lo dicta la plataforma vía la variable PORT.
+PUERTO = int(os.environ.get("PORT", 8501))
 
 # Si SAMECO deploya a SAMI en Agent Runtime, pegar acá el nombre completo de
 # la instancia (Implementaciones → Nombre del recurso) o pasarlo por env.
@@ -169,4 +171,4 @@ if __name__ == "__main__":
         sys.exit(1)
     modo = "REMOTO (Agent Runtime)" if REMOTO else "local (réplica con google-genai)"
     print(f"Chat SAMI (proyecto {PROJECT}) en http://localhost:{PUERTO}  ·  modo {modo}")
-    HTTPServer(("", PUERTO), Handler).serve_forever()
+    ThreadingHTTPServer(("", PUERTO), Handler).serve_forever()
