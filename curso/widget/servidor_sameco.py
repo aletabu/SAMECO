@@ -33,7 +33,7 @@ PUERTO = 8501                 # 8500 queda para la demo del sandbox
 # la instancia (Implementaciones → Nombre del recurso) o pasarlo por env.
 AGENT_ENGINE = os.environ.get(
     "AGENT_ENGINE",
-    "projects/agente-biblioteca/locations/us-west1/reasoningEngines/COMPLETAR_TRAS_DEPLOY")
+    "projects/agente-biblioteca/locations/us-west1/reasoningEngines/8062630805551185920")
 
 REMOTO = "--remoto" in sys.argv
 
