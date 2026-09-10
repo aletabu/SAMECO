@@ -35,7 +35,7 @@ AGENT_ENGINE = os.environ.get(
     "AGENT_ENGINE",
     "projects/agente-biblioteca/locations/us-west1/reasoningEngines/8062630805551185920")
 
-REMOTO = "--remoto" in sys.argv
+REMOTO = any(a in sys.argv for a in ("--remoto", "--remote"))
 
 # Instrucciones tomadas del Get code del agente SAMI (Agent Studio de SAMECO)
 INSTRUCCIONES = """Sos SAMI, el asistente para el evento de SAMECO: el asistente oficial sobre el Encuentro SAMECO 2026.
