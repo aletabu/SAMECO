@@ -85,6 +85,24 @@ gcloud run deploy sami-chat \
    En unos minutos devuelve la URL pública: `https://sami-chat-….run.app`.
 5. Probar desde otro dispositivo/red, no solo la propia máquina.
 
+**En organizaciones "seguras por defecto" (como la de SAMECO), el primer
+deploy necesita dos permisos más** — una sola vez, y los dos avisan con un
+error claro si faltan (ver la tabla de abajo):
+
+```bash
+# 1) El "obrero" de Cloud Build (la SA default de Compute) nace sin permisos
+#    ni para leer el código fuente subido. Su rol paquete:
+gcloud projects add-iam-policy-binding TU_PROYECTO \
+  --member="serviceAccount:NUMERO_DE_PROYECTO-compute@developer.gserviceaccount.com" \
+  --role="roles/cloudbuild.builds.builder"
+
+# 2) Quien deploya necesita poder "actuar como" la SA del servicio:
+gcloud iam service-accounts add-iam-policy-binding \
+  sami-servicio@TU_PROYECTO.iam.gserviceaccount.com \
+  --member="user:USUARIO_QUE_DEPLOYA" \
+  --role="roles/iam.serviceAccountUser"
+```
+
 Detalles del código que ya están resueltos (por si se adapta a otro proyecto):
 Cloud Run dicta el puerto por la variable `PORT` (el server la lee, con 8501
 de fallback local) y el server usa `ThreadingHTTPServer` para atender
@@ -111,3 +129,5 @@ consultas en paralelo.
 | "La creación de claves de la cuenta de servicio está inhabilitada" | Política de la organización (`iam.disableServiceAccountKeyCreation`) | No pelearla: usar la SA **adjunta** a Cloud Run (este instructivo) |
 | Deploy de Agent Runtime: "failed to start and cannot serve traffic" | Primer deploy en un proyecto recién creado (aprovisionamiento en curso) | Borrar la instancia fallida y reintentar; si repite, ver el traceback en Cloud Logging (`resource.type="aiplatform.googleapis.com/ReasoningEngine"`) |
 | El server ignora el modo remoto | Flag mal tipeado | Es `--remoto` (el server acepta también `--remote`); al arrancar imprime el modo activo |
+| Deploy: "Build failed because the default service account is missing required IAM permissions" / `permission_denied … -compute@developer.gserviceaccount.com` | En orgs seguras por defecto, la SA default de Compute (que usa Cloud Build) nace sin permisos | Rol **Cloud Build Service Account** (`roles/cloudbuild.builds.builder`) a `NUMERO-compute@developer.gserviceaccount.com` (comando en la sección de publicación) |
+| Deploy: `PERMISSION_DENIED … iam.serviceaccounts.actAs` | Quien deploya no puede "actuar como" la SA del servicio | Rol **Service Account User** al usuario que deploya, sobre la SA `sami-servicio@…` |
