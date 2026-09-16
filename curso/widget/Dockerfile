@@ -10,10 +10,12 @@
 #     --service-account sami-servicio@agente-biblioteca.iam.gserviceaccount.com \
 #     --allow-unauthenticated
 #
-# El servidor arranca en modo REMOTO: le habla al agente SAMI deployado en
-# Agent Runtime (el cerebro vive en Agent Studio; el equipo lo edita ahí con
-# Update, sin tocar este contenedor). Para el modo autocontenido sin Runtime
-# (Gemini + datastore directo, sin costo por hora), quitar "--remoto" del CMD.
+# El servidor arranca en modo LOCAL (autocontenido): Gemini + datastore
+# directo, sin instancia de Agent Runtime → sin costo fijo por hora; las
+# instrucciones de SAMI viven en servidor_sameco.py. Para volver al agente
+# hosteado (edición de prompt con clics en Agent Studio): re-deployar SAMI
+# desde el Designer, actualizar AGENT_ENGINE con el ID nuevo y agregar
+# "--remoto" al CMD.
 
 FROM python:3.12-slim
 
@@ -23,4 +25,4 @@ RUN pip install --no-cache-dir google-genai requests
 
 COPY servidor_sameco.py index_sameco.html logo-sameco.png ./
 
-CMD ["python", "servidor_sameco.py", "--remoto"]
+CMD ["python", "servidor_sameco.py"]
