@@ -112,6 +112,9 @@ if REMOTO:
     import requests as _rq
     _region = AGENT_ENGINE.split("/")[3]
     _BASE = f"https://{_region}-aiplatform.googleapis.com/v1/{AGENT_ENGINE}"
+    # Las sesiones se crean con la API administrada de Sessions (no es un
+    # class_method del agente): POST .../reasoningEngines/ID/sessions
+    _SESIONES = f"https://{_region}-aiplatform.googleapis.com/v1beta1/{AGENT_ENGINE}/sessions"
     _creds, _ = google.auth.default(
         scopes=["https://www.googleapis.com/auth/cloud-platform"])
 
@@ -124,11 +127,12 @@ if REMOTO:
 def responder_remoto(mensajes, cliente):
     if cliente not in sesiones:
         try:
-            r = _rq.post(_BASE + ":query", headers=_auth(), timeout=60,
-                         json={"class_method": "create_session",
-                               "input": {"user_id": cliente}})
+            r = _rq.post(_SESIONES, headers=_auth(), timeout=60,
+                         json={"userId": cliente})
             r.raise_for_status()
-            sesiones[cliente] = r.json()["output"]["id"]
+            j = r.json()
+            nombre = (j.get("response") or {}).get("name") or j.get("name", "")
+            sesiones[cliente] = nombre.split("/sessions/")[1].split("/")[0]
         except Exception:
             sesiones[cliente] = None   # sin sesión: cada turno va suelto
     entrada = {"user_id": cliente, "message": mensajes[-1]["texto"]}
