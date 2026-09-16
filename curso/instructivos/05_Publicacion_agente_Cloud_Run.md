@@ -121,6 +121,26 @@ Cloud Run dicta el puerto por la variable `PORT` (el server la lee, con 8501
 de fallback local) y el server usa `ThreadingHTTPServer` para atender
 consultas en paralelo.
 
+## Dónde se ve todo esto en la consola
+
+Un `gcloud run deploy --source .` toca **tres productos**, cada uno con su
+pantalla. Saber cuál es cuál evita buscar las cosas donde no están:
+
+| Pantalla | Ruta en la consola | Qué hay ahí |
+|---|---|---|
+| **Cloud Run** — el servicio vivo | Menú ☰ → Cloud Run (`console.cloud.google.com/run`) → `sami-chat` | La **URL** pública, las **revisiones** (cada deploy crea una; se puede volver a una anterior con "Administrar tráfico"), los **registros** (cada request y los `print` del server — acá se debuggea), **métricas** (requests, latencia, instancias) y la config (SA adjunta, memoria, el ajuste de invocador público) |
+| **Cloud Build** — la fábrica | Menú ☰ → Cloud Build → Historial | Un registro por cada construcción de imagen, con su log completo — acá se ve por qué falló un build |
+| **Artifact Registry** — el depósito de imágenes | Menú ☰ → Artifact Registry (`console.cloud.google.com/artifacts`) → repo `cloud-run-source-deploy` | Las **imágenes Docker** que cada build produjo (el deploy desde fuente crea este repo solo). Cada deploy suma una imagen nueva; las viejas quedan |
+
+Sobre el depósito: las imágenes se acumulan deploy tras deploy y ocupan
+almacenamiento (free tier: 0,5 GB por cuenta de facturación; luego $0,10/GB/mes
+— verificado sept-2026). Con una imagen chica como esta tarda en doler, pero
+la higiene correcta es una **política de limpieza** en el repo
+`cloud-run-source-deploy` (pestaña "Políticas de limpieza": p. ej. conservar
+las 5 versiones más recientes) — se configura una vez y se olvida. Borrar
+imágenes viejas no afecta al servicio corriendo (la revisión activa retiene
+la suya).
+
 ## Después de publicar: la lista corta
 
 - **Alerta de presupuesto** en el proyecto (como en el Paso 2 del instructivo
