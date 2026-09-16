@@ -137,6 +137,8 @@ const chat = document.getElementById("chat");
 const input = document.getElementById("msg");
 const boton = document.getElementById("enviar");
 const mensajes = [];
+// Identificador de este visitante (para que el server le dé su propia sesión)
+const cliente = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2));
 
 function pintar(rol, texto, fuentes) {
   const div = document.createElement("div");
@@ -164,7 +166,7 @@ async function enviar() {
     const r = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mensajes }),
+      body: JSON.stringify({ mensajes, cliente }),
     });
     const data = await r.json();
     espera.remove();

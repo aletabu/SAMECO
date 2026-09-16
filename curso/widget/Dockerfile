@@ -10,9 +10,10 @@
 #     --service-account sami-servicio@agente-biblioteca.iam.gserviceaccount.com \
 #     --allow-unauthenticated
 #
-# El servidor arranca en modo local (Gemini + datastore directo, sin depender
-# del Agent Runtime). Para que use la instancia deployada de SAMI, cambiar el
-# CMD a ["python", "servidor_sameco.py", "--remoto"].
+# El servidor arranca en modo REMOTO: le habla al agente SAMI deployado en
+# Agent Runtime (el cerebro vive en Agent Studio; el equipo lo edita ahí con
+# Update, sin tocar este contenedor). Para el modo autocontenido sin Runtime
+# (Gemini + datastore directo, sin costo por hora), quitar "--remoto" del CMD.
 
 FROM python:3.12-slim
 
@@ -22,4 +23,4 @@ RUN pip install --no-cache-dir google-genai "google-cloud-aiplatform[agent_engin
 
 COPY servidor_sameco.py index_sameco.html logo-sameco.png ./
 
-CMD ["python", "servidor_sameco.py"]
+CMD ["python", "servidor_sameco.py", "--remoto"]

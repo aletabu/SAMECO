@@ -102,7 +102,7 @@ def responder_local(mensajes):
 
 # ----- Modo remoto: SAMI deployado en Agent Runtime de SAMECO -----
 motor = None
-sesion_remota = {"id": None}   # una sesión server-side por corrida del servidor
+sesiones = {}   # una sesión server-side POR VISITANTE (id que genera la página)
 
 if REMOTO:
     import vertexai
@@ -112,14 +112,14 @@ if REMOTO:
     motor = agent_engines.get(AGENT_ENGINE)
 
 
-def responder_remoto(mensajes):
-    if sesion_remota["id"] is None:
-        s = motor.create_session(user_id="chat-sameco")
-        sesion_remota["id"] = s["id"] if isinstance(s, dict) else s.id
+def responder_remoto(mensajes, cliente):
+    if cliente not in sesiones:
+        s = motor.create_session(user_id=cliente)
+        sesiones[cliente] = s["id"] if isinstance(s, dict) else s.id
     partes, fuentes = [], []
     # Solo el último mensaje: el contexto lo mantiene la sesión en Google
-    for ev in motor.stream_query(user_id="chat-sameco",
-                                 session_id=sesion_remota["id"],
+    for ev in motor.stream_query(user_id=cliente,
+                                 session_id=sesiones[cliente],
                                  message=mensajes[-1]["texto"]):
         contenido = (ev.get("content") or {}) if isinstance(ev, dict) else {}
         for p in contenido.get("parts", []):
@@ -146,7 +146,8 @@ class Handler(SimpleHTTPRequestHandler):
         datos = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
         try:
             if REMOTO:
-                texto, fuentes = responder_remoto(datos["mensajes"])
+                cliente = str(datos.get("cliente", "anonimo"))[:64]
+                texto, fuentes = responder_remoto(datos["mensajes"], cliente)
             else:
                 texto, fuentes = responder_local(datos["mensajes"])
             cuerpo = {"texto": texto, "fuentes": fuentes}
