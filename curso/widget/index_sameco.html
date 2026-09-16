@@ -6,61 +6,25 @@
 <title>SAMI — Asistente SAMECO</title>
 <style>
   :root {
-    --azul: #123c5b;
     --violeta: #7c3aed;
     --tinta: #1f2937;
     --gris: #6b7280;
     --panel: #f3f4f6;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, "Segoe UI", Arial, sans-serif; color: var(--tinta); background: #fff; }
-
-  header {
-    background: var(--azul);
-    color: #fff;
-    padding: 2.5rem 1.5rem 2rem;
-    text-align: center;
-  }
-  header .logo { height: 38px; margin-bottom: .8rem; }
-  header .kicker {
-    color: #93c5fd;
-    font-size: .85rem;
-    font-weight: 700;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-  }
-  header h1 { font-size: 2rem; margin: .4rem 0 .3rem; }
-  header p { color: #d1d5db; }
-
-  .contenedor {
-    max-width: 720px;
-    margin: 2rem auto 3rem;
-    padding: 0 1.5rem;
-  }
-  .col {
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    padding: 1.3rem;
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+    color: var(--tinta);
+    background: #fff;
     display: flex;
     flex-direction: column;
-    gap: .9rem;
+    padding: .75rem;
+    gap: .6rem;
   }
-  .col h2 { font-size: 1.05rem; }
-  .col .etiqueta {
-    font-size: .72rem;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    padding: .25rem .6rem;
-    border-radius: 999px;
-    width: fit-content;
-    color: #fff;
-    background: var(--violeta);
-  }
-  .col .desc { font-size: .85rem; color: var(--gris); }
 
   #chat {
-    height: 420px;
+    flex: 1;
     overflow-y: auto;
     background: var(--panel);
     border-radius: 10px;
@@ -91,46 +55,15 @@
     font-size: 1rem;
     cursor: pointer;
   }
-
-  .nota {
-    max-width: 720px;
-    margin: 0 auto 2.5rem;
-    padding: 0 1.5rem;
-    font-size: .8rem;
-    color: var(--gris);
-  }
 </style>
 </head>
 <body>
 
-<header>
-  <img src="logo-sameco.png" alt="SAMECO" class="logo">
-  <div class="kicker">Proyecto agente-biblioteca · página de prueba</div>
-  <h1>SAMI — Asistente SAMECO</h1>
-  <p>El Bibliotecario del archivo y del Encuentro 2026, contra la biblioteca real</p>
-</header>
-
-<div class="contenedor">
-  <section class="col">
-    <span class="etiqueta">Agent Studio · réplica local</span>
-    <h2>Chateá con SAMI</h2>
-    <p class="desc">Mismas instrucciones, mismo modelo (gemini-3.5-flash) y mismo
-       datastore (<code>almacen_global</code>) que el agente SAMI del Agent Studio
-       de SAMECO. Lo sirve <code>servidor_sameco.py</code>.</p>
-    <div id="chat"></div>
-    <div class="fila-input">
-      <input id="msg" placeholder="Escribile a SAMI…" autocomplete="off" />
-      <button id="enviar">➤</button>
-    </div>
-  </section>
+<div id="chat"></div>
+<div class="fila-input">
+  <input id="msg" placeholder="Escribile a SAMI…" autocomplete="off" />
+  <button id="enviar">➤</button>
 </div>
-
-<p class="nota">
-  Página de prueba — no es el sitio real de SAMECO. Requiere
-  <code>servidor_sameco.py</code> corriendo con credenciales (ADC) que tengan
-  acceso al proyecto <code>agente-biblioteca</code>; en producción sería un
-  backend con su cuenta de servicio.
-</p>
 
 <script>
 const chat = document.getElementById("chat");
@@ -173,7 +106,7 @@ async function enviar() {
     mensajes.push({ rol: "bot", texto: data.texto });
     pintar("bot", data.texto, data.fuentes);
   } catch (e) {
-    espera.textContent = "[No pude contactar al servidor — ¿está corriendo servidor_sameco.py?]";
+    espera.textContent = "[No pude contactar al asistente — probá de nuevo en un momento]";
   }
 }
 
