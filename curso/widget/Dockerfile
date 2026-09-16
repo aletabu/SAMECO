@@ -19,7 +19,7 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir google-genai "google-cloud-aiplatform[agent_engines]"
+RUN pip install --no-cache-dir google-genai requests
 
 COPY servidor_sameco.py index_sameco.html logo-sameco.png ./
 

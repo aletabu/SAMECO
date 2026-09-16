@@ -9,7 +9,7 @@
 # Discovery Engine User): o te agregan el gmail, o logueás ADC con la cuenta
 # SAMECO (eso pisa tu ADC del sandbox hasta volver a loguear la tuya).
 #
-# Requisitos: pip3 install --user google-genai
+# Requisitos: pip3 install --user google-genai requests
 # Uso: python3 servidor_sameco.py            →  http://localhost:8501
 #      python3 servidor_sameco.py --remoto   →  contra su Agent Runtime (si lo
 #                                               deployan; completar AGENT_ENGINE)
@@ -101,32 +101,53 @@ def responder_local(mensajes):
 
 
 # ----- Modo remoto: SAMI deployado en Agent Runtime de SAMECO -----
-motor = None
+# Va por la API REST de la instancia (los endpoints :query / :streamQuery que
+# muestra la consola en Implementaciones), sin depender del SDK de aiplatform
+# (cuya interfaz de agent_engines cambia entre versiones).
 sesiones = {}   # una sesión server-side POR VISITANTE (id que genera la página)
 
 if REMOTO:
-    import vertexai
-    from vertexai import agent_engines
-    region = AGENT_ENGINE.split("/")[3]
-    vertexai.init(project=PROJECT, location=region)
-    motor = agent_engines.get(AGENT_ENGINE)
+    import google.auth
+    import google.auth.transport.requests
+    import requests as _rq
+    _region = AGENT_ENGINE.split("/")[3]
+    _BASE = f"https://{_region}-aiplatform.googleapis.com/v1/{AGENT_ENGINE}"
+    _creds, _ = google.auth.default(
+        scopes=["https://www.googleapis.com/auth/cloud-platform"])
+
+    def _auth():
+        if not _creds.valid:
+            _creds.refresh(google.auth.transport.requests.Request())
+        return {"Authorization": f"Bearer {_creds.token}"}
 
 
 def responder_remoto(mensajes, cliente):
     if cliente not in sesiones:
-        s = motor.create_session(user_id=cliente)
-        sesiones[cliente] = s["id"] if isinstance(s, dict) else s.id
+        try:
+            r = _rq.post(_BASE + ":query", headers=_auth(), timeout=60,
+                         json={"class_method": "create_session",
+                               "input": {"user_id": cliente}})
+            r.raise_for_status()
+            sesiones[cliente] = r.json()["output"]["id"]
+        except Exception:
+            sesiones[cliente] = None   # sin sesión: cada turno va suelto
+    entrada = {"user_id": cliente, "message": mensajes[-1]["texto"]}
+    if sesiones[cliente]:
+        # Solo el último mensaje: el contexto lo mantiene la sesión en Google
+        entrada["session_id"] = sesiones[cliente]
+    r = _rq.post(_BASE + ":streamQuery", headers=_auth(), timeout=120,
+                 json={"class_method": "stream_query", "input": entrada})
+    r.raise_for_status()
     partes, fuentes = [], []
-    # Solo el último mensaje: el contexto lo mantiene la sesión en Google
-    for ev in motor.stream_query(user_id=cliente,
-                                 session_id=sesiones[cliente],
-                                 message=mensajes[-1]["texto"]):
-        contenido = (ev.get("content") or {}) if isinstance(ev, dict) else {}
-        for p in contenido.get("parts", []):
+    for linea in r.text.splitlines():
+        try:
+            ev = json.loads(linea)
+        except ValueError:
+            continue
+        for p in (ev.get("content") or {}).get("parts", []):
             if p.get("text") and not p.get("thought"):
                 partes.append(p["text"])
-        gm = ev.get("grounding_metadata") if isinstance(ev, dict) else None
-        for ch in (gm or {}).get("grounding_chunks", []):
+        for ch in (ev.get("grounding_metadata") or {}).get("grounding_chunks", []):
             titulo = (ch.get("retrieved_context") or {}).get("title")
             if titulo and titulo not in fuentes:
                 fuentes.append(titulo)
