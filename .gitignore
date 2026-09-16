@@ -7,3 +7,9 @@
 # (los .docx de curso/material_practica/ SÍ se versionan)
 /*.docx
 .venv/
+
+# Basura de PowerPoint (locks y autoguardado) y de Python
+~$*
+**/~$*
+*[Enregistré automatiquement]*
+__pycache__/
