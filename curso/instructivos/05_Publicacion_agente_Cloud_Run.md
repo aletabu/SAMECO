@@ -33,7 +33,20 @@ El servidor tiene dos modos, y elegir uno es una decisión de costos:
 Para un chat de evento, el modo local es el recomendado: mismo comportamiento
 (las instrucciones y el datastore son idénticos), una pieza menos y factura
 menor. El remoto queda para cuando el agente crezca (sub-agentes, más
-herramientas, Memory Bank).
+herramientas, Memory Bank) o mientras el equipo esté iterando el prompt seguido.
+
+**Disciplina del modo local — la fuente de verdad del prompt es el código:**
+en modo local las instrucciones viven en `servidor_sameco.py`; editar el agente
+en Agent Studio NO impacta el chat. El flujo correcto para retocar el
+comportamiento: editar las instrucciones en el `.py` (o editarlas en Studio y
+copiarlas al `.py` tal cual, verificando que queden idénticas), commitear y
+redeployar. Si las dos copias divergen, el Preview de Studio y el chat público
+responden distinto — el error más confuso de debuggear que existe.
+
+Referencia de costos de la decisión (estimado sept-2026, validar contra
+Billing): remoto ≈ USD 75–85/mes de piso (la instancia factura por hora,
+~$0,0864/vCPU-h + $0,009/GB-h) + ~$0,02 por pregunta; local ≈ sin piso,
+solo ~$0,02 por pregunta (Cloud Run escala a cero).
 
 ## La identidad: cuenta de servicio, sin claves
 
