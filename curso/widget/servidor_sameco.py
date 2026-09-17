@@ -18,6 +18,7 @@ import json
 import mimetypes
 import os
 import sys
+import time
 import urllib.parse
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 
@@ -120,12 +121,21 @@ def responder_local(mensajes):
                       parts=[types.Part.from_text(text=m["texto"])])
         for m in mensajes
     ]
-    resp = client.models.generate_content(
-        model=MODELO,
-        contents=contents,
-        config=types.GenerateContentConfig(
-            system_instruction=INSTRUCCIONES, tools=[TOOL]),
-    )
+    resp = None
+    for intento in range(3):   # la cuota por minuto se recupera sola: reintentar
+        try:
+            resp = client.models.generate_content(
+                model=MODELO,
+                contents=contents,
+                config=types.GenerateContentConfig(
+                    system_instruction=INSTRUCCIONES, tools=[TOOL]),
+            )
+            break
+        except Exception as e:
+            if "429" in str(e) and intento < 2:
+                time.sleep(10 * (intento + 1))
+            else:
+                raise
     fuentes = []
     try:
         for ch in resp.candidates[0].grounding_metadata.grounding_chunks:

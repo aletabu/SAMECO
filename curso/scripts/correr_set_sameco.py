@@ -24,7 +24,7 @@ from google.genai import types
 URL_CHAT = "https://sami-chat-929656340238.us-west1.run.app/api/chat"
 PROYECTO_JUEZ = "sameco-conf-2026"   # el juez corre en el sandbox de Alejandro
 MODELO_JUEZ = "gemini-2.5-flash"
-PAUSA_SEG = 13   # cuota free trial ~5 req/min
+PAUSA_SEG = 22   # más margen: la corrida v2 mostró que 13s satura la cuota del chat
 
 ESQUEMA_JUEZ = {
     "type": "OBJECT",
