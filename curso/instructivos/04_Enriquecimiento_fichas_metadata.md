@@ -58,9 +58,16 @@ permisos de IAM. Con el campo `url` en la ficha:
   (instrucción: *"al citar un documento, incluí el campo url de su ficha como
   enlace de descarga"*).
 - La URL puede apuntar a donde convenga: objetos públicos del bucket
-  (`https://storage.googleapis.com/BUCKET/ruta`) o — mejor para producción —
-  a los documentos ya publicados en el **sitio web de la organización**, con
-  el bucket de indexación siempre privado.
+  (`https://storage.googleapis.com/BUCKET/ruta`), los documentos ya publicados
+  en el **sitio web de la organización**, o — la elegida para producción
+  (sept-2026) — el **dominio propio del chat**: el server expone
+  `GET /descargar/<ruta>` y entrega el archivo leyéndolo del bucket con su
+  cuenta de servicio. Ventajas: el bucket queda **privado**, las URLs de las
+  fichas no se atan al storage (si se muda, los links sobreviven), y cada
+  descarga queda logueada. Con esta opción, `URL_PUBLICA_BASE` del script es
+  `https://<dominio-del-chat>/descargar/`. Orden de migración: regenerar
+  fichas con la URL nueva → re-importar (Completa) → recién entonces
+  privatizar el bucket (al revés, los links viejos citados se rompen).
 - El script la genera solo (config `URL_PUBLICA_BASE`); si un documento no
   debe ser descargable, se deja su `url` vacía.
 4. **Revisión humana de las fichas** (en SAMECO: contra la planilla del equipo). Este paso no se automatiza: es donde el criterio agrega valor.
