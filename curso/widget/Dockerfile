@@ -21,7 +21,7 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir google-genai requests
+RUN pip install --no-cache-dir google-genai requests google-cloud-storage
 
 COPY servidor_sameco.py index_sameco.html logo-sameco.png ./
 

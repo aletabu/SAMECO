@@ -15,8 +15,10 @@
 #                                               deployan; completar AGENT_ENGINE)
 
 import json
+import mimetypes
 import os
 import sys
+import urllib.parse
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 
 from google import genai
@@ -27,6 +29,13 @@ LOCATION = "global"   # los modelos gemini-3.x solo se sirven desde global
 DATASTORE = ("projects/agente-biblioteca/locations/us/collections/"
              "default_collection/dataStores/almacen-global_1788552974869")
 MODELO = "gemini-3.5-flash"   # el mismo que usa SAMI en su Agent Studio
+
+# Descargas por dominio propio: GET /descargar/<ruta> lee el objeto de este
+# bucket (que puede ser PRIVADO: lee el server con su cuenta de servicio, no
+# el visitante) y lo entrega desde nuestra URL. Las fichas de metadata llevan
+# entonces https://<nuestro-dominio>/descargar/<ruta> en su campo "url".
+BUCKET_DESCARGAS = "biblioteca_sameco_global"
+gcs = None   # cliente de Storage, creado en el primer uso
 # 8501 local (8500 queda para la demo del sandbox); en Cloud Run el puerto
 # lo dicta la plataforma vía la variable PORT.
 PUERTO = int(os.environ.get("PORT", 8501))
@@ -160,9 +169,33 @@ def responder_remoto(mensajes, cliente):
 
 class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
+        if self.path.startswith("/descargar/"):
+            return self.descargar(
+                urllib.parse.unquote(self.path[len("/descargar/"):]))
         if self.path in ("/", "/index.html"):
             self.path = "/index_sameco.html"
         return super().do_GET()
+
+    def descargar(self, ruta):
+        global gcs
+        try:
+            if gcs is None:
+                from google.cloud import storage
+                gcs = storage.Client(project=PROJECT)
+            datos = gcs.bucket(BUCKET_DESCARGAS).blob(ruta).download_as_bytes()
+        except Exception:
+            self.send_error(404, "Documento no encontrado")
+            return
+        nombre = ruta.rsplit("/", 1)[-1]
+        print(f"descarga: {ruta}")   # queda en los logs de Cloud Run
+        self.send_response(200)
+        self.send_header("Content-Type",
+                         mimetypes.guess_type(ruta)[0] or "application/octet-stream")
+        self.send_header("Content-Length", str(len(datos)))
+        self.send_header("Content-Disposition",
+                         "attachment; filename*=UTF-8''" + urllib.parse.quote(nombre))
+        self.end_headers()
+        self.wfile.write(datos)
 
     def do_POST(self):
         if self.path != "/api/chat":
