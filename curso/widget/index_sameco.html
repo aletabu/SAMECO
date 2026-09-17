@@ -36,7 +36,11 @@
   }
   .msg { max-width: 85%; padding: .55rem .8rem; border-radius: 12px; white-space: pre-wrap; }
   .msg.user { align-self: flex-end; background: var(--violeta); color: #fff; }
-  .msg.bot { align-self: flex-start; background: #fff; border: 1px solid #e5e7eb; }
+  .msg.bot { align-self: flex-start; background: #fff; border: 1px solid #e5e7eb; white-space: normal; }
+  .msg.bot p { margin: .35rem 0; }
+  .msg.bot ul { margin: .35rem 0; padding-left: 1.2rem; }
+  .msg.bot li { margin: .15rem 0; }
+  .msg.bot a { color: var(--violeta); font-weight: 600; word-break: break-all; }
   .msg.bot .fuentes { display: block; margin-top: .4rem; font-size: .75rem; color: var(--gris); }
   .fila-input { display: flex; gap: .5rem; }
   #msg {
@@ -73,10 +77,34 @@ const mensajes = [];
 // Identificador de este visitante (para que el server le dé su propia sesión)
 const cliente = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2));
 
+// Markdown mínimo y seguro: escapa HTML y convierte negritas, links y listas.
+function md(texto) {
+  const esc = texto.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const linea = (s) => s
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+             '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  const html = [];
+  let lista = false;
+  for (const l of esc.split("\n")) {
+    const item = l.match(/^\s*[*-]\s+(.*)$/);
+    if (item) {
+      if (!lista) { html.push("<ul>"); lista = true; }
+      html.push("<li>" + linea(item[1]) + "</li>");
+    } else {
+      if (lista) { html.push("</ul>"); lista = false; }
+      if (l.trim()) html.push("<p>" + linea(l) + "</p>");
+    }
+  }
+  if (lista) html.push("</ul>");
+  return html.join("");
+}
+
 function pintar(rol, texto, fuentes) {
   const div = document.createElement("div");
   div.className = "msg " + (rol === "user" ? "user" : "bot");
-  div.textContent = texto;
+  if (rol === "user") div.textContent = texto;
+  else div.innerHTML = md(texto);
   if (fuentes && fuentes.length) {
     const f = document.createElement("span");
     f.className = "fuentes";
