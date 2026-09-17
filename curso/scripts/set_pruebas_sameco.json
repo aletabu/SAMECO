@@ -293,7 +293,7 @@
     "gm": "GM08",
     "dificultad": "Media",
     "pregunta": "¿Qué hizo Litoral Gas con las inspecciones?",
-    "esperado": "",
+    "esperado": "Digitalizó el proceso de inspecciones domiciliarias: 100 % de turnos digitalizados, cierre automático de órdenes y ruteo automático, 0 % de papel; −20 % plazo de otorgamiento de turno y −30 % cancelaciones (GM08). Este turno establece el contexto para el turno 2.",
     "debe": "Mantener el contexto (Litoral Gas) y aplicar la regla de privacidad.",
     "no_debe": "Listar los 8 nombres del A3."
   },
