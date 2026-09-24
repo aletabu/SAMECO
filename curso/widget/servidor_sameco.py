@@ -37,6 +37,10 @@ MODELO = "gemini-3.5-flash"   # el mismo que usa SAMI en su Agent Studio
 # entonces https://<nuestro-dominio>/descargar/<ruta> en su campo "url".
 BUCKET_DESCARGAS = "biblioteca_sameco_global"
 gcs = None   # cliente de Storage, creado en el primer uso
+
+# Documentos internos que no se muestran como "Fuentes" en el chat (info
+# oficial del evento: SAMI la responde en primera persona, sin cita).
+FUENTES_OCULTAS = ("Documento_Contexto",)
 # 8501 local (8500 queda para la demo del sandbox); en Cloud Run el puerto
 # lo dicta la plataforma vía la variable PORT.
 PUERTO = int(os.environ.get("PORT", 8501))
@@ -62,7 +66,12 @@ REGLAS:
    conocimiento general ni de memoria, aunque creas saber la respuesta.
 
 2. CÓMO RESPONDER: Basá cada afirmación solo en lo que devolvió la búsqueda.
-   Citá siempre la fuente al final: (Fuente: [nombre del documento]). Si usaste varios documentos, citá cada uno, y nunca mezcles datos de proyectos distintos.
+   Cuando la respuesta salga de los trabajos de la biblioteca (los A3), citá
+   siempre la fuente al final: (Fuente: [nombre del documento]). Si usaste
+   varios documentos, citá cada uno, y nunca mezcles datos de proyectos
+   distintos. En cambio, la información práctica del Encuentro (fecha, sede,
+   cómo llegar, inscripción, traslados, agenda) la respondés directo como
+   información oficial de SAMECO, sin citar ningún documento.
 
 2b. ENLACES DE DESCARGA: El único enlace de descarga válido es el que figura TEXTUAL en el campo "url" de los metadatos del documento. Usalo tal cual, sin modificarlo. Si el documento no tiene ese campo o está vacío, NO ofrezcas descarga: no lo menciones, no te disculpes por no tenerlo, y nunca construyas, deduzcas ni adaptes una dirección a partir del nombre del archivo, de una ruta interna (gs://...) o de otro documento.
 
@@ -141,7 +150,8 @@ def responder_local(mensajes):
     try:
         for ch in resp.candidates[0].grounding_metadata.grounding_chunks:
             rc = ch.retrieved_context
-            if rc and rc.title and rc.title not in fuentes:
+            if (rc and rc.title and rc.title not in fuentes
+                    and not rc.title.startswith(FUENTES_OCULTAS)):
                 fuentes.append(rc.title)
     except (AttributeError, TypeError, IndexError):
         pass
