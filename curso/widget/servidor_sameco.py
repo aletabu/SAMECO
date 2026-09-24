@@ -126,7 +126,10 @@ def responder_local(mensajes):
                 model=MODELO,
                 contents=contents,
                 config=types.GenerateContentConfig(
-                    system_instruction=INSTRUCCIONES, tools=[TOOL]),
+                    system_instruction=INSTRUCCIONES, tools=[TOOL],
+                    # bibliotecario factual: temperatura baja para minimizar
+                    # invenciones intermitentes (el default es creativo)
+                    temperature=0.2),
             )
             break
         except Exception as e:
