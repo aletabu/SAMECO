@@ -16,11 +16,15 @@
 #     datastore → Import data → Cloud Storage → "JSONL con metadatos",
 #     modo FULL para no duplicar IDs (ver nota al final del script).
 
+import csv
+import difflib
 import io
 import json
 import re
+import subprocess
 import sys
 import time
+import unicodedata
 
 import docx
 from google.cloud import storage
@@ -89,6 +93,72 @@ INSTRUCCION = (
 PAUSA_SEG = 13   # cuota del free trial: ~5 requests/min → espaciar llamadas
 
 
+# ----- Mapeo opcional archivo→URL pública (CSV del equipo) -----
+# Uso: --mapeo mapeo_urls_sameco.csv  → el campo "url" de cada ficha sale de
+# la columna WEB de la fila que matchee con el archivo (y "video" de YOUTUBE).
+# Un archivo sin fila en el mapeo queda SIN url (el agente no ofrece descarga).
+
+def _normalizar(s):
+    s = unicodedata.normalize("NFD", s)
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn").lower()
+    # fuera prefijos/decoraciones de nombre de archivo: "2026 GM08", "A3",
+    # "31° Encuentro", extensión, números sueltos de versión
+    s = re.sub(r"\.(pptx?|pdf|docx?)$", "", s)
+    s = re.sub(r"\b20\d\d\b|\bgm\d+\b|\ba3\b|31.?\s*encuentro", " ", s)
+    s = re.sub(r"[^a-z0-9ñ]+", " ", s)
+    return " ".join(s.split())
+
+
+def cargar_mapeo(ruta):
+    with open(ruta, encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+
+def emparejar(nombres, mapeo):
+    """Asigna a cada archivo del bucket su fila del CSV por similitud de texto.
+
+    Compara el nombre normalizado contra las columnas A3 y ORGANIZACION+NOMBRE
+    (el máximo de ambas, así una celda A3 mal copiada no arruina el match).
+    Devuelve {nombre: fila} y una lista de reportes para revisión humana."""
+    puntajes = []
+    for n in nombres:
+        base = _normalizar(n.rsplit("/", 1)[-1])
+        for i, fila in enumerate(mapeo):
+            score = max(
+                difflib.SequenceMatcher(None, base, _normalizar(fila["A3"])).ratio(),
+                difflib.SequenceMatcher(
+                    None, base,
+                    _normalizar(fila["ORGANIZACION"] + " " + fila["NOMBRE"])).ratio(),
+            )
+            puntajes.append((score, n, i))
+    puntajes.sort(reverse=True)
+    asignado, usado, reporte = {}, set(), []
+    for score, n, i in puntajes:   # greedy: mejores matches primero, únicos
+        if n in asignado or i in usado:
+            continue
+        if score < 0.55:
+            continue
+        asignado[n] = mapeo[i]
+        usado.add(i)
+        reporte.append((score, n.rsplit("/", 1)[-1], mapeo[i]["ORGANIZACION"]))
+    for n in nombres:
+        if n not in asignado:
+            reporte.append((0.0, n.rsplit("/", 1)[-1], "** SIN FILA EN EL CSV → sin url **"))
+    for i, fila in enumerate(mapeo):
+        if i not in usado:
+            reporte.append((0.0, "** FILA SIN ARCHIVO EN EL BUCKET **", fila["ORGANIZACION"]))
+    return asignado, sorted(reporte)
+
+
+def credenciales_gcloud():
+    """Credenciales desde `gcloud auth print-access-token` (la cuenta del CLI,
+    p. ej. la de SAMECO) para leer un bucket al que el ADC local no accede."""
+    from google.oauth2.credentials import Credentials
+    token = subprocess.check_output(
+        ["gcloud", "auth", "print-access-token"], text=True).strip()
+    return Credentials(token=token)
+
+
 def generar(ia, contents, schema):
     """Llamada a Gemini con reintentos ante 429 (cuota por minuto del free trial)."""
     for intento in range(4):
@@ -129,13 +199,45 @@ def normalizar_etiquetas(ia, docs):
 
 
 def main():
-    gcs = storage.Client(project=PROJECT_ID)
-    ia = genai.Client(vertexai=True, project=PROJECT_ID, location=LOCATION)
-    bucket = gcs.bucket(BUCKET)
+    # Flags opcionales (sin flags = sandbox, comportamiento original):
+    #   --bucket B --carpeta C      otro bucket/carpeta (repetible --carpeta)
+    #   --mapeo archivo.csv         urls públicas desde el CSV del equipo
+    #   --storage-gcloud            leer el bucket con la cuenta del gcloud CLI
+    #   --gemini-proyecto P         proyecto donde facturan las llamadas a Gemini
+    #   --solo-mapeo                solo mostrar la tabla de matching y salir
+    args = sys.argv[1:]
+    def _flag(nombre, defecto=None):
+        return args[args.index(nombre) + 1] if nombre in args else defecto
+    bucket_nombre = _flag("--bucket", BUCKET)
+    carpetas = ([args[i + 1] for i, a in enumerate(args) if a == "--carpeta"]
+                or CARPETAS)
+    mapeo_ruta = _flag("--mapeo")
+    proyecto_gemini = _flag("--gemini-proyecto", PROJECT_ID)
+
+    creds = credenciales_gcloud() if "--storage-gcloud" in args else None
+    gcs = storage.Client(project=PROJECT_ID, credentials=creds) if creds \
+        else storage.Client(project=PROJECT_ID)
+    ia = genai.Client(vertexai=True, project=proyecto_gemini, location=LOCATION)
+    bucket = gcs.bucket(bucket_nombre)
+
+    mapeo, asignacion = None, {}
+    if mapeo_ruta:
+        mapeo = cargar_mapeo(mapeo_ruta)
+        nombres = [b.name for c in carpetas for b in bucket.list_blobs(prefix=c)
+                   if "." in b.name
+                   and "." + b.name.rsplit(".", 1)[-1].lower() in MIMES]
+        asignacion, reporte = emparejar(nombres, mapeo)
+        print(f"Mapeo {mapeo_ruta}: {len(mapeo)} filas · {len(nombres)} archivos "
+              f"· {len(asignacion)} matcheados\n")
+        for score, archivo, org in reporte:
+            print(f"  {score:.2f}  {archivo[:70]:70}  →  {org}")
+        if "--solo-mapeo" in args:
+            return 0
+        print()
 
     # Fase 1 — bibliotecario: una ficha por documento
     docs = []
-    for carpeta in CARPETAS:
+    for carpeta in carpetas:
         blobs = [b for b in bucket.list_blobs(prefix=carpeta)
                  if "." in b.name and "." + b.name.rsplit(".", 1)[-1].lower() in MIMES]
         # si un documento está en dos formatos (p. ej. .docx y .md), fichar uno solo
@@ -159,12 +261,19 @@ def main():
             respuesta = generar(ia, [parte, INSTRUCCION], ESQUEMA_FICHA)
             time.sleep(PAUSA_SEG)
             ficha = json.loads(respuesta.text)
-            if URL_PUBLICA_BASE:
+            if mapeo is not None:
+                fila = asignacion.get(blob.name)
+                if fila:   # url de la página pública del sitio; video si hay
+                    ficha["url"] = fila["WEB"]
+                    if fila.get("YOUTUBE"):
+                        ficha["video"] = fila["YOUTUBE"]
+                # sin fila en el CSV → sin "url": el agente no ofrece descarga
+            elif URL_PUBLICA_BASE:
                 ficha["url"] = URL_PUBLICA_BASE + blob.name
             print(f"  → {ficha['titulo']} ({ficha['anio']}) · {ficha['etiquetas']}")
             docs.append({"id": slug(blob.name), "carpeta": carpeta,
                          "ficha": ficha, "mime": MIMES[ext],
-                         "uri": f"gs://{BUCKET}/{blob.name}"})
+                         "uri": f"gs://{bucket_nombre}/{blob.name}"})
 
     # Fase 2 — curador: normalizar etiquetas/sector/tema entre TODOS los docs
     print("\nNormalizando taxonomía entre documentos …")
@@ -176,7 +285,7 @@ def main():
     print(f"Vocabulario final ({len(vocabulario)}): {', '.join(vocabulario)}")
 
     # Escritura de los JSONL por carpeta
-    for carpeta in CARPETAS:
+    for carpeta in carpetas:
         salida = carpeta.rstrip("/") + ".metadata.jsonl"
         lineas = [json.dumps({"id": d["id"], "structData": d["ficha"],
                               "content": {"mimeType": d["mime"], "uri": d["uri"]}},
@@ -187,7 +296,7 @@ def main():
         print(f"{salida}: {len(lineas)} fichas. REVISALAS A MANO antes de importar.")
 
     print("Siguiente paso: subir los .jsonl al bucket (fuera de las carpetas de docs,")
-    print("p. ej. gs://%s/metadata/) y en el datastore usar Import data →" % BUCKET)
+    print("p. ej. gs://%s/metadata/) y en el datastore usar Import data →" % bucket_nombre)
     print("Cloud Storage → 'JSONL con metadatos'. Usar modo FULL si los documentos ya")
     print("estaban importados sin ficha (los IDs autogenerados viejos no coinciden con")
     print("estos y el modo incremental duplicaría).")
